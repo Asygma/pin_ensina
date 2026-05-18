@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Tabuadas · Primeiro Ciclo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #3A9E2F;
+            --primary-light: #D6F0D2;
+            --accent: #F5C800;
+            --green: #3A9E2F;
+            --green-dark: #2A7A21;
+            --green-light: #EBF7E9;
+            --red: #D93025;
+            --orange: #E07B00;
+            --bg: #FFFFFF;
+            --white: #FFFFFF;
+            --text: #111111;
+            --muted: #555555;
+            --border: #C8E8C4;
+            --radius: 12px;
+            --shadow: 0 4px 20px rgba(58, 158, 47, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .screen { display: none; }
+
+        /* ===== START SCREEN ===== */
+        #start-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .pim-wrap {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pim-wrap img {
+            width: 160px;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            font-weight: 900;
+            line-height: 1.15;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 600;
+        }
+
+        .form-group {
+            width: 100%;
+            max-width: 360px;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            color: var(--text);
+            background: var(--white);
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .btn {
+            padding: 0.9rem 2.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+        .btn:active { transform: translateY(0); }
+
+        .btn-primary { background: var(--primary); color: white; margin-top: 1rem; }
+        .btn-green { background: var(--green); color: white; }
+        .btn-amber { background: var(--accent); color: #111111; }
+        .btn-email { background: #111111; color: white; }
+        .btn-retry { background: var(--primary); color: white; }
+
+        .start-meta {
+            margin-top: 1.5rem;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        /* ===== TEST SCREEN ===== */
+        #test-screen {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0.75rem 1rem 3rem;
+        }
+
+        .test-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 0.8rem 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0.5rem;
+            z-index: 100;
+            gap: 1rem;
+        }
+
+        .test-title-block .test-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .test-title-block .test-student {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .timer {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--primary);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.02em;
+        }
+
+        .timer.warning { color: var(--accent); }
+        .timer.critical {
+            color: var(--red);
+            animation: pulse-timer 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-timer {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0.6; transform: scale(1.05); }
+        }
+
+        .test-date-block {
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-align: right;
+        }
+
+        /* Questions grid */
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        @media (max-width: 680px) {
+            .questions-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .question-column {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 0.9rem 0.75rem;
+            box-shadow: var(--shadow);
+        }
+
+        .question-row {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-row:last-child { margin-bottom: 0; }
+
+        .q-num {
+            font-size: 0.7rem;
+            color: var(--muted);
+            width: 1.4rem;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .q-text {
+            font-size: 0.9rem;
+            font-weight: 700;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .answer-input {
+            width: 3.4rem;
+            padding: 0.25rem 0.35rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: 700;
+            background: var(--bg);
+            transition: border-color 0.15s, background 0.15s;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+
+        .answer-input::-webkit-inner-spin-button,
+        .answer-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .answer-input.correct {
+            border-color: var(--green);
+            background: #ECFDF5;
+            color: #065F46;
+        }
+
+        .answer-input.wrong {
+            border-color: var(--red);
+            background: #FEF2F2;
+            color: #991B1B;
+        }
+
+        /* Word Problems */
+        .word-problems {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .problem-item {
+            margin-bottom: 1.1rem;
+            padding-bottom: 1.1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .problem-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .problem-text {
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+            line-height: 1.55;
+        }
+
+        .problem-answer {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .problem-answer label {
+            font-size: 0.8rem;
+            margin-bottom: 0;
+            color: var(--muted);
+        }
+
+        .problem-answer .answer-input {
+            width: 5.5rem;
+        }
+
+        /* Submit */
+        .submit-area {
+            text-align: center;
+            padding: 1rem 0 2rem;
+        }
+
+        /* ===== RESULTS SCREEN ===== */
+        #results-screen {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 2rem 1rem 3rem;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 1.75rem;
+        }
+
+        .results-header .pim-wrap {
+            margin-bottom: 1rem;
+        }
+
+        .result-name {
+            font-size: 1.1rem;
+            color: var(--muted);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-display {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .score-fraction {
+            font-size: 0.95rem;
+            color: var(--muted);
+            margin-top: 0.3rem;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 0.55rem 2.5rem;
+            border-radius: 999px;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: white;
+            margin: 0.9rem 0 0.4rem;
+        }
+
+        .level-Insuficiente { background: var(--red); }
+        .level-Suficiente { background: var(--orange); }
+        .level-Bom { background: var(--accent); color: #111111; }
+        .level-MuitoBom { background: var(--green); }
+        .level-Excelente { background: var(--primary); }
+
+        .result-message {
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .results-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.25rem;
+        }
+
+        .table-analysis {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.6rem;
+        }
+
+        @media (max-width: 480px) {
+            .table-analysis { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .table-chip {
+            text-align: center;
+            padding: 0.7rem 0.4rem;
+            border-radius: 10px;
+            border: 2px solid;
+        }
+
+        .table-chip .t-name { font-size: 0.72rem; font-weight: 700; }
+        .table-chip .t-score { font-size: 1rem; font-weight: 900; margin: 0.2rem 0; }
+        .table-chip .t-pct { font-size: 0.72rem; font-weight: 600; }
+
+        .chip-great { border-color: var(--green); background: #ECFDF5; color: #065F46; }
+        .chip-ok { border-color: var(--accent); background: #FFFBEB; color: #92400E; }
+        .chip-weak { border-color: var(--red); background: #FEF2F2; color: #991B1B; }
+
+        .problem-result-row {
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .problem-result-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .problem-result-row .prob-text {
+            color: var(--text);
+            margin-bottom: 0.25rem;
+            line-height: 1.45;
+        }
+
+        .problem-result-row .prob-verdict {
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .verdict-correct { color: var(--green); }
+        .verdict-wrong { color: var(--red); }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .score-breakdown {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 0.75rem 0;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .score-breakdown span strong {
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== SCREEN 1: START ===== -->
+<div id="start-screen" class="screen">
+    <div class="pim-wrap">
+        <img src="pin.png" alt="Pim" width="150">
+    </div>
+
+    <h1>Teste Tabuadas</h1>
+    <p class="subtitle">Primeiro Ciclo &nbsp;·&nbsp; by Gigi</p>
+
+    <div class="form-group">
+        <label for="student-name">O teu nome</label>
+        <input type="text" id="student-name" placeholder="Escreve o teu nome aqui" autocomplete="off" autocorrect="off"/>
+    </div>
+
+    <div class="form-group">
+        <label for="test-date">Data</label>
+        <input type="date" id="test-date" readonly/>
+    </div>
+
+    <button class="btn btn-primary" onclick="startTest()">
+        ✏️ Começar o Teste
+    </button>
+
+    <p class="start-meta">⏱ 15 minutos &nbsp;&nbsp;·&nbsp;&nbsp; 68 contas &nbsp;&nbsp;+&nbsp;&nbsp; 5 problemas</p>
+</div>
+
+<!-- ===== SCREEN 2: TEST ===== -->
+<div id="test-screen" class="screen">
+    <div class="test-header">
+        <div class="test-title-block">
+            <div class="test-title">Teste Tabuadas</div>
+            <div class="test-student" id="header-student"></div>
+        </div>
+        <div id="timer" class="timer">15:00</div>
+        <div class="test-date-block" id="header-date"></div>
+    </div>
+
+    <div class="questions-grid" id="questions-grid"></div>
+
+    <div class="word-problems">
+        <div class="section-title">📖 Problemas</div>
+        <div id="problems-container"></div>
+    </div>
+
+    <div class="submit-area">
+        <button class="btn btn-green" onclick="submitTest(false)">
+            ✅ Entregar o Teste
+        </button>
+    </div>
+</div>
+
+<!-- ===== SCREEN 3: RESULTS ===== -->
+<div id="results-screen" class="screen">
+    <div class="results-header">
+        <div class="pim-wrap">
+            <img src="pin.png" alt="Pim" width="110">
+        </div>
+
+        <div class="result-name" id="result-name"></div>
+        <div class="score-display" id="result-score"></div>
+        <div class="score-breakdown" id="result-breakdown"></div>
+        <div class="score-fraction" id="result-pct"></div>
+        <div id="result-level" class="level-badge"></div>
+        <div class="result-message" id="result-message"></div>
+    </div>
+
+    <div class="results-card">
+        <div class="section-title">📊 Análise por Tabuada</div>
+        <div class="table-analysis" id="table-analysis"></div>
+    </div>
+
+    <div class="results-card">
+        <div class="section-title">📖 Resultados dos Problemas</div>
+        <div id="problems-results"></div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn btn-amber" onclick="downloadCSV()">⬇️ Descarregar Resultados</button>
+        <button class="btn btn-email" onclick="sendEmail()">📧 Enviar à Gigi</button>
+        <button class="btn btn-retry" onclick="retryTest()">🔄 Fazer Novamente</button>
+    </div>
+</div>
+
+<script>
+// ===== CONFIGURAÇÃO — preenche o email da Gigi aqui =====
+const GIGI_EMAIL = 'gigipitoca137@gmail.com';
+
+// ===== STATE =====
+let questions      = [];
+let wordProblems   = [];
+let timerInterval  = null;
+let secondsLeft    = 900;
+let testSubmitted  = false;
+let studentName    = '';
+let testDate       = '';
+let results        = null;
+
+// ===== WORD PROBLEM TEMPLATES =====
+const templates = [
+    (a, b) => ({ text: `A Sofia tem ${a} caixas de lápis de cor. Em cada caixa há ${b} lápis. Quantos lápis tem a Sofia ao todo?`, answer: a * b }),
+    (a, b) => ({ text: `Numa padaria foram feitos ${a} tabuleiros de bolinhos. Em cada tabuleiro cabem ${b} bolinhos. Quantos bolinhos foram feitos ao todo?`, answer: a * b }),
+    (a, b) => ({ text: `A turma da Gigi foi ao jardim zoológico em ${a} autocarros. Em cada autocarro viajaram ${b} crianças. Quantas crianças foram ao todo?`, answer: a * b }),
+    (a, b) => ({ text: `O Tomás tem ${a} sacos de berlindes. Em cada saco há ${b} berlindes. Quantos berlindes tem o Tomás?`, answer: a * b }),
+    (a, b) => ({ text: `Numa horta há ${a} canteiros com ${b} plantas cada um. Quantas plantas há na horta ao todo?`, answer: a * b }),
+    (a, b) => ({ text: `A professora comprou ${a} pacotes de folhas. Cada pacote tem ${b} folhas. Quantas folhas comprou ao todo?`, answer: a * b }),
+    (a, b) => ({ text: `Há ${a} prateleiras numa biblioteca com ${b} livros cada uma. Quantos livros há ao todo?`, answer: a * b }),
+];
+
+// ===== GENERATE QUESTIONS =====
+function generateQuestions() {
+    const pool = [];
+    for (let a = 1; a <= 9; a++) {
+        for (let b = 1; b <= 9; b++) {
+            pool.push({ a, b, answer: a * b });
+        }
+    }
+    shuffle(pool);
+    return pool.slice(0, 68);
+}
+
+function generateWordProblems() {
+    const picked = shuffle([...templates]).slice(0, 5);
+    return picked.map(fn => {
+        const a = randInt(2, 9);
+        const b = randInt(2, 9);
+        return fn(a, b);
+    });
+}
+
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// ===== START =====
+function startTest() {
+    studentName = document.getElementById('student-name').value.trim();
+    if (!studentName) {
+        alert('Por favor, escreve o teu nome antes de começar! 😊');
+        document.getElementById('student-name').focus();
+        return;
+    }
+    testDate      = document.getElementById('test-date').value;
+    questions     = generateQuestions();
+    wordProblems  = generateWordProblems();
+    testSubmitted = false;
+    secondsLeft   = 900;
+
+    renderQuestions();
+    renderProblems();
+
+    document.getElementById('header-student').textContent = studentName;
+    document.getElementById('header-date').textContent = formatDateDisplay(testDate);
+
+    showScreen('test-screen');
+    startTimer();
+
+    setTimeout(() => {
+        const first = document.getElementById('q-0');
+        if (first) first.focus();
+    }, 150);
+}
+
+// ===== RENDER QUESTIONS =====
+function renderQuestions() {
+    const grid = document.getElementById('questions-grid');
+    grid.innerHTML = '';
+
+    for (let col = 0; col < 4; col++) {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'question-column';
+
+        for (let row = 0; row < 17; row++) {
+            const idx = col * 17 + row;
+            const q   = questions[idx];
+
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'question-row';
+            rowDiv.innerHTML =
+                `<span class="q-num">${idx + 1}.</span>` +
+                `<span class="q-text">${q.a} &times; ${q.b} =</span>` +
+                `<input type="number" class="answer-input" id="q-${idx}"
+                        min="0" max="81" inputmode="numeric"
+                        onkeydown="navQ(event,${idx})">`;
+            colDiv.appendChild(rowDiv);
+        }
+        grid.appendChild(colDiv);
+    }
+}
+
+function navQ(event, idx) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        const next = document.getElementById(`q-${idx + 1}`) || document.getElementById('p-0');
+        if (next) next.focus();
+    }
+}
+
+// ===== RENDER PROBLEMS =====
+function renderProblems() {
+    const container = document.getElementById('problems-container');
+    container.innerHTML = '';
+
+    wordProblems.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'problem-item';
+        div.innerHTML =
+            `<div class="problem-text"><strong>${i + 1}.</strong> ${p.text}</div>` +
+            `<div class="problem-answer">` +
+            `<label>Resposta:</label>` +
+            `<input type="number" class="answer-input" id="p-${i}"
+                    min="0" max="999" inputmode="numeric"
+                    onkeydown="navP(event,${i})">` +
+            `</div>`;
+        container.appendChild(div);
+    });
+}
+
+function navP(event, idx) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        const next = document.getElementById(`p-${idx + 1}`);
+        if (next) next.focus();
+    }
+}
+
+// ===== TIMER =====
+function startTimer() {
+    updateTimer();
+    timerInterval = setInterval(() => {
+        secondsLeft--;
+        updateTimer();
+        if (secondsLeft <= 0) {
+            clearInterval(timerInterval);
+            alert('⏰ O tempo acabou! A entregar o teste automaticamente…');
+            submitTest(true);
+        }
+    }, 1000);
+}
+
+function updateTimer() {
+    const m  = Math.floor(secondsLeft / 60);
+    const s  = secondsLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = `${pad(m)}:${pad(s)}`;
+    el.className   = 'timer';
+    if (secondsLeft <= 60)      el.classList.add('critical');
+    else if (secondsLeft <= 180) el.classList.add('warning');
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+// ===== SUBMIT =====
+function submitTest(auto) {
+    if (testSubmitted) return;
+    if (!auto && !confirm('Tens a certeza que queres entregar o teste?')) return;
+
+    testSubmitted = true;
+    clearInterval(timerInterval);
+
+    const timeUsed = 900 - secondsLeft;
+
+    // Score questions
+    let correctQ = 0;
+    const qResults = questions.map((q, i) => {
+        const el  = document.getElementById(`q-${i}`);
+        const val = parseInt(el.value, 10);
+        const ok  = Number.isFinite(val) && val === q.answer;
+        if (ok) correctQ++;
+        el.classList.add(ok ? 'correct' : 'wrong');
+        if (!ok) el.value = `${Number.isFinite(val) ? val : '?'}`;
+        el.disabled = true;
+        return { ...q, userAnswer: val, correct: ok };
+    });
+
+    // Score word problems
+    let correctP = 0;
+    const pResults = wordProblems.map((p, i) => {
+        const el  = document.getElementById(`p-${i}`);
+        const val = parseInt(el.value, 10);
+        const ok  = Number.isFinite(val) && val === p.answer;
+        if (ok) correctP++;
+        el.classList.add(ok ? 'correct' : 'wrong');
+        el.disabled = true;
+        return { ...p, userAnswer: val, correct: ok };
+    });
+
+    const total = correctQ + correctP;
+    const pct   = Math.round((total / 73) * 100);
+
+    // Table stats
+    const stats = {};
+    for (let t = 1; t <= 9; t++) stats[t] = { correct: 0, total: 0 };
+    qResults.forEach(q => {
+        stats[q.a].total++; stats[q.b].total++;
+        if (q.correct) { stats[q.a].correct++; stats[q.b].correct++; }
+    });
+
+    results = { studentName, testDate, timeUsed, correctQ, correctP, total, pct,
+                level: getLevel(pct), stats, qResults, pResults };
+
+    setTimeout(() => showResults(), 600);
+}
+
+function getLevel(pct) {
+    if (pct >= 90) return { name: 'Excelente',   cls: 'level-Excelente',   msg: '🌟 Incrível! Estás no topo da turma!' };
+    if (pct >= 70) return { name: 'Muito Bom',   cls: 'level-MuitoBom',    msg: '🎉 Muito bom trabalho! Continua assim!' };
+    if (pct >= 55) return { name: 'Bom',          cls: 'level-Bom',         msg: '👍 Bom esforço! Com um pouco mais de prática chegas lá.' };
+    if (pct >= 40) return { name: 'Suficiente',  cls: 'level-Suficiente',  msg: '💪 Já sabes bastante! Vamos praticar um bocadinho mais.' };
+    return             { name: 'Insuficiente', cls: 'level-Insuficiente', msg: '📚 Não te preocupes, vamos estudar juntos e vai melhorar!' };
+}
+
+// ===== SHOW RESULTS =====
+function showResults() {
+    const r = results;
+    showScreen('results-screen');
+    window.scrollTo(0, 0);
+
+    document.getElementById('result-name').textContent      = r.studentName + ' · ' + formatDateDisplay(r.testDate);
+    document.getElementById('result-score').textContent     = `${r.total} / 73`;
+    document.getElementById('result-pct').textContent       = `${r.pct}% corretas · tempo usado: ${formatTime(r.timeUsed)}`;
+    document.getElementById('result-breakdown').innerHTML   =
+        `<span>Contas: <strong>${r.correctQ}/68</strong></span><span>Problemas: <strong>${r.correctP}/5</strong></span>`;
+
+    const lvlEl = document.getElementById('result-level');
+    lvlEl.textContent = r.level.name;
+    lvlEl.className   = `level-badge ${r.level.cls}`;
+
+    document.getElementById('result-message').textContent = r.level.msg;
+
+    // Table analysis
+    const anaEl = document.getElementById('table-analysis');
+    anaEl.innerHTML = '';
+    for (let t = 2; t <= 9; t++) {
+        const s   = r.stats[t];
+        if (!s.total) continue;
+        const p   = Math.round((s.correct / s.total) * 100);
+        const cls = p >= 80 ? 'chip-great' : p >= 60 ? 'chip-ok' : 'chip-weak';
+        anaEl.innerHTML +=
+            `<div class="table-chip ${cls}">` +
+            `<div class="t-name">Tabuada ${t}</div>` +
+            `<div class="t-score">${s.correct}/${s.total}</div>` +
+            `<div class="t-pct">${p}%</div>` +
+            `</div>`;
+    }
+
+    // Problem results
+    const probEl = document.getElementById('problems-results');
+    probEl.innerHTML = r.pResults.map((p, i) =>
+        `<div class="problem-result-row">` +
+        `<div class="prob-text"><strong>${i+1}.</strong> ${p.text}</div>` +
+        `<div class="prob-verdict ${p.correct ? 'verdict-correct' : 'verdict-wrong'}">` +
+        (p.correct
+            ? `✅ Correto! Resposta: ${p.answer}`
+            : `❌ Respondeste ${Number.isFinite(p.userAnswer) ? p.userAnswer : 'nada'} · Resposta certa: ${p.answer}`) +
+        `</div></div>`
+    ).join('');
+}
+
+// ===== CSV DOWNLOAD =====
+function downloadCSV() {
+    if (!results) return;
+    const r   = results;
+    const sep = ';';
+    const q   = s => `"${String(s).replace(/"/g, "'")}"`;
+    const rows = [];
+
+    // ---- Cabeçalho do ficheiro ----
+    rows.push(['TESTE DE TABUADAS — PRIMEIRO CICLO', '', '', '', '']);
+    rows.push(['', '', '', '', '']);
+
+    // ---- Secção 1: Resumo ----
+    rows.push(['RESUMO DO TESTE', '', '', '', '']);
+    rows.push(['Nome da Aluna', 'Data', 'Tempo Utilizado', 'Classificação', 'Percentagem']);
+    rows.push([q(r.studentName), formatDateDisplay(r.testDate), formatTime(r.timeUsed), q(r.level.name), r.pct + '%']);
+    rows.push(['', '', '', '', '']);
+    rows.push(['', 'Contas (68)', 'Certas', 'Erradas', '']);
+    rows.push(['', '', r.correctQ, 68 - r.correctQ, '']);
+    rows.push(['', 'Problemas (5)', 'Certos', 'Errados', '']);
+    rows.push(['', '', r.correctP, 5 - r.correctP, '']);
+    rows.push(['', 'TOTAL (73)', r.total, 73 - r.total, '']);
+    rows.push(['', '', '', '', '']);
+
+    // ---- Secção 2: Desempenho por tabuada ----
+    rows.push(['DESEMPENHO POR TABUADA', '', '', '', '']);
+    rows.push(['Tabuada', 'Respostas Certas', 'Total de Perguntas', 'Percentagem', 'Estado']);
+    for (let t = 2; t <= 9; t++) {
+        const s   = r.stats[t];
+        if (!s.total) continue;
+        const pct = Math.round((s.correct / s.total) * 100);
+        const estado = pct >= 80 ? 'Bom' : pct >= 60 ? 'A melhorar' : 'Precisa de prática';
+        rows.push([`Tabuada do ${t}`, s.correct, s.total, pct + '%', estado]);
+    }
+    rows.push(['', '', '', '', '']);
+
+    // ---- Secção 3: Contas com erros ----
+    const wrongQ = r.qResults.filter(q => !q.correct);
+    rows.push([`CONTAS COM ERROS (${wrongQ.length} de 68)`, '', '', '', '']);
+    if (wrongQ.length === 0) {
+        rows.push(['Parabéns! Todas as contas estavam certas!', '', '', '', '']);
+    } else {
+        rows.push(['Conta', 'Resposta Certa', 'Resposta da Aluna', '', '']);
+        wrongQ.forEach(q => {
+            rows.push([
+                `${q.a} × ${q.b}`,
+                q.answer,
+                Number.isFinite(q.userAnswer) ? q.userAnswer : '(sem resposta)',
+                '', ''
+            ]);
+        });
+    }
+    rows.push(['', '', '', '', '']);
+
+    // ---- Secção 4: Problemas ----
+    rows.push(['PROBLEMAS', '', '', '', '']);
+    rows.push(['Enunciado', 'Resposta Certa', 'Resposta da Aluna', 'Resultado', '']);
+    r.pResults.forEach(p => {
+        rows.push([
+            q(p.text),
+            p.answer,
+            Number.isFinite(p.userAnswer) ? p.userAnswer : '(sem resposta)',
+            p.correct ? 'Certo' : 'Errado',
+            ''
+        ]);
+    });
+
+    const csv  = rows.map(row => row.join(sep)).join('\n');
+    const bom  = '﻿';
+    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `tabuadas-${r.studentName.replace(/\s+/g, '-').toLowerCase()}-${r.testDate}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ===== ENVIAR POR EMAIL =====
+function sendEmail() {
+    if (!results) return;
+    const r = results;
+
+    const wrongTables = [];
+    for (let t = 2; t <= 9; t++) {
+        const s   = r.stats[t];
+        const pct = s.total ? Math.round((s.correct / s.total) * 100) : 100;
+        if (pct < 70) wrongTables.push(`Tabuada do ${t} (${pct}%)`);
+    }
+
+    const wrongQ = r.qResults.filter(q => !q.correct)
+        .map(q => `${q.a}×${q.b}=${q.answer} (respondeu: ${Number.isFinite(q.userAnswer) ? q.userAnswer : '?'})`)
+        .join(', ');
+
+    const subject = `Resultado do Teste de Tabuadas — ${r.studentName} — ${formatDateDisplay(r.testDate)}`;
+
+    const body = [
+        `Olá Gigi!`,
+        ``,
+        `Aqui está o resultado do teste de ${r.studentName}:`,
+        ``,
+        `DATA: ${formatDateDisplay(r.testDate)}`,
+        `TEMPO UTILIZADO: ${formatTime(r.timeUsed)}`,
+        `RESULTADO: ${r.total}/73 (${r.pct}%) — ${r.level.name}`,
+        `  • Contas: ${r.correctQ}/68`,
+        `  • Problemas: ${r.correctP}/5`,
+        ``,
+        `TABUADAS A MELHORAR:`,
+        wrongTables.length ? wrongTables.join(', ') : 'Nenhuma — muito bem!',
+        ``,
+        `CONTAS ERRADAS:`,
+        wrongQ || 'Nenhuma — todas certas!',
+        ``,
+        `Bom estudo!`,
+        `— Teste Tabuadas by Gigi 🐸`,
+    ].join('\n');
+
+    const mailto = `mailto:${GIGI_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+}
+
+// ===== RETRY =====
+function retryTest() {
+    if (!confirm('Queres fazer o teste de novo?')) return;
+    clearInterval(timerInterval);
+    testSubmitted = false;
+    results = null;
+    showScreen('start-screen');
+}
+
+// ===== HELPERS =====
+function showScreen(id) {
+    ['start-screen', 'test-screen', 'results-screen'].forEach(s => {
+        const el = document.getElementById(s);
+        el.classList.remove('active');
+        el.style.display = 'none';
+    });
+    const target = document.getElementById(id);
+    target.style.display = id === 'start-screen' ? 'flex' : 'block';
+    target.classList.add('active');
+}
+
+function formatDateDisplay(d) {
+    if (!d) return '';
+    const [y, m, day] = d.split('-');
+    return `${day}/${m}/${y}`;
+}
+
+function formatTime(s) {
+    return `${Math.floor(s / 60)}m${pad(s % 60)}s`;
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    const y  = today.getFullYear();
+    const m  = pad(today.getMonth() + 1);
+    const d  = pad(today.getDate());
+    document.getElementById('test-date').value = `${y}-${m}-${d}`;
+    showScreen('start-screen');
+});
+</script>
+</body>
+</html>
