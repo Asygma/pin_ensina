@@ -22,9 +22,16 @@ function ResultadoContent() {
     }
     setStudentName(name);
 
-    // Na versão final real, os dados do teste (questões e respostas do aluno) 
-    // seriam passados do estado global ou localStorage para aqui avaliar.
-    // Para efeito de demonstração, simulamos que passamos para o backend:
+    const savedData = sessionStorage.getItem('lastQuizData');
+    let quizData = { questions: [], answers: {} };
+    if (savedData) {
+      try {
+        quizData = JSON.parse(savedData);
+      } catch (e) {
+        console.error('Error parsing quiz data', e);
+      }
+    }
+
     const evaluateTest = async () => {
       try {
         const response = await fetch('/api/evaluate-quiz', {
@@ -33,8 +40,8 @@ function ResultadoContent() {
           body: JSON.stringify({ 
             materia, 
             studentName: name,
-            questions: [], // Em um ambiente real, pegaríamos de localStorage/Context
-            answers: {} 
+            questions: quizData.questions,
+            answers: quizData.answers 
           })
         });
         const data = await response.json();
@@ -68,10 +75,11 @@ function ResultadoContent() {
     <main className="container animate-fade-in">
       <div className={styles.resultCard}>
         <div className={styles.scoreCircle}>
-          <span className={styles.scoreValue}>{result.score || 100}</span>
+          <span className={styles.scoreValue}>{result.score || 0}</span>
           <span className={styles.scoreLabel}>Pontos</span>
         </div>
         
+        <img src="/pin.jpeg" alt="O Pin" style={{ width: '100px', height: '100px', borderRadius: '50%', marginBottom: '1rem', border: '4px solid var(--secondary)' }} />
         <h1 className={styles.title}>Feedback do Pin</h1>
         <p className={styles.feedback}>{result.feedback}</p>
 
@@ -83,12 +91,22 @@ function ResultadoContent() {
                 <li key={idx}>⭐ {item}</li>
               ))}
             </ul>
+            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+              <button className="btn-secondary" onClick={() => router.push(`/estudar?materia=${materia}`)}>
+                Ir para Revisão (Aprender com o Pin)
+              </button>
+            </div>
           </div>
         )}
 
-        <button className="btn-primary" onClick={() => router.push('/materias')}>
-          Fazer Novo Teste
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <button className="btn-primary" onClick={() => router.push(`/quiz?materia=${materia}`)}>
+            Refazer o Teste
+          </button>
+          <button className="btn-secondary" onClick={() => router.push(`/materia/${materia}`)}>
+            Voltar ao Menu
+          </button>
+        </div>
       </div>
     </main>
   );

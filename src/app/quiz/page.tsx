@@ -60,7 +60,8 @@ function QuizContent() {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // Submit quiz
+      // Submit quiz: save data for results page
+      sessionStorage.setItem('lastQuizData', JSON.stringify({ questions, answers }));
       router.push(`/resultado?materia=${materia}`);
     }
   };
