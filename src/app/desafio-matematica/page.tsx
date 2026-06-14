@@ -14,36 +14,73 @@ type MathProblem = {
 
 const TOTAL_QUESTIONS = 10;
 
-function generateProblems(): MathProblem[] {
+// Levels: 1 (easy), 2 (medium), 3 (hard)
+function generateProblems(operator: string, level: number): MathProblem[] {
   const problems: MathProblem[] = [];
-  const operators = ['+', '-', 'x', '÷'];
 
   for (let i = 0; i < TOTAL_QUESTIONS; i++) {
-    const operator = operators[Math.floor(Math.random() * operators.length)];
     let num1 = 0;
     let num2 = 0;
     let answer = 0;
 
     switch (operator) {
       case '+':
-        num1 = Math.floor(Math.random() * 90) + 10; // 10 a 99
-        num2 = Math.floor(Math.random() * 90) + 10;
+        if (level === 1) {
+          num1 = Math.floor(Math.random() * 9) + 1; // 1 to 9
+          num2 = Math.floor(Math.random() * 9) + 1;
+        } else if (level === 2) {
+          num1 = Math.floor(Math.random() * 90) + 10; // 10 to 99
+          num2 = Math.floor(Math.random() * 9) + 1; // Mixed 2-digit + 1-digit
+        } else {
+          num1 = Math.floor(Math.random() * 900) + 100; // 100 to 999
+          num2 = Math.floor(Math.random() * 900) + 100;
+        }
         answer = num1 + num2;
         break;
       case '-':
-        num1 = Math.floor(Math.random() * 90) + 10;
-        num2 = Math.floor(Math.random() * (num1 - 1)) + 1; // Garante que não é negativo
+        if (level === 1) {
+          num1 = Math.floor(Math.random() * 9) + 2; 
+          num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+        } else if (level === 2) {
+          num1 = Math.floor(Math.random() * 90) + 10;
+          num2 = Math.floor(Math.random() * 90) + 1;
+          if (num2 > num1) {
+            const temp = num1; num1 = num2; num2 = temp;
+          }
+        } else {
+          num1 = Math.floor(Math.random() * 900) + 100;
+          num2 = Math.floor(Math.random() * 900) + 100;
+          if (num2 > num1) {
+            const temp = num1; num1 = num2; num2 = temp;
+          }
+        }
         answer = num1 - num2;
         break;
       case 'x':
-        num1 = Math.floor(Math.random() * 9) + 2; // 2 a 10
-        num2 = Math.floor(Math.random() * 9) + 2;
+        if (level === 1) {
+          num1 = Math.floor(Math.random() * 9) + 1;
+          num2 = Math.floor(Math.random() * 9) + 1;
+        } else if (level === 2) {
+          num1 = Math.floor(Math.random() * 9) + 2;
+          num2 = Math.floor(Math.random() * 90) + 10;
+        } else {
+          num1 = Math.floor(Math.random() * 90) + 10;
+          num2 = Math.floor(Math.random() * 90) + 10;
+        }
         answer = num1 * num2;
         break;
       case '÷':
-        num2 = Math.floor(Math.random() * 9) + 2; // Divisor de 2 a 10
-        answer = Math.floor(Math.random() * 9) + 2; // Resultado de 2 a 10
-        num1 = num2 * answer; // Garante divisão exata
+        if (level === 1) {
+          num2 = Math.floor(Math.random() * 9) + 1;
+          answer = Math.floor(Math.random() * 9) + 1;
+        } else if (level === 2) {
+          num2 = Math.floor(Math.random() * 9) + 2;
+          answer = Math.floor(Math.random() * 20) + 2;
+        } else {
+          num2 = Math.floor(Math.random() * 20) + 2;
+          answer = Math.floor(Math.random() * 50) + 10;
+        }
+        num1 = num2 * answer;
         break;
     }
 
@@ -56,6 +93,9 @@ function generateProblems(): MathProblem[] {
 export default function DesafioMatematica() {
   const router = useRouter();
   const [studentName, setStudentName] = useState('');
+  const [selectedOperator, setSelectedOperator] = useState<string | null>(null);
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
+  
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputValue, setInputValue] = useState('');
@@ -74,12 +114,6 @@ export default function DesafioMatematica() {
       return;
     }
     setStudentName(name);
-    setProblems(generateProblems());
-    
-    const savedScores = localStorage.getItem('mathLeaderboard');
-    if (savedScores) {
-      setLeaderboard(JSON.parse(savedScores));
-    }
   }, [router]);
 
   useEffect(() => {
@@ -94,10 +128,22 @@ export default function DesafioMatematica() {
   }, [startTime, isFinished]);
 
   const startChallenge = () => {
+    if (!selectedOperator || !selectedLevel) return;
+    
+    setProblems(generateProblems(selectedOperator, selectedLevel));
     setStartTime(Date.now());
     setTimeout(() => {
       inputRef.current?.focus();
     }, 100);
+  };
+
+  const loadLeaderboard = () => {
+    const key = `mathLeaderboard_${selectedOperator}_${selectedLevel}`;
+    const savedScores = localStorage.getItem(key);
+    if (savedScores) {
+      return JSON.parse(savedScores);
+    }
+    return [];
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,18 +161,14 @@ export default function DesafioMatematica() {
     const numAnswer = parseInt(inputValue, 10);
     
     if (numAnswer === currentProblem.answer) {
-      // Correct! Move to next
       if (currentIndex < TOTAL_QUESTIONS - 1) {
         setCurrentIndex(currentIndex + 1);
         setInputValue('');
       } else {
-        // Finished
         finishChallenge();
       }
     } else {
-      // Wrong answer! Visual feedback could be added here
-      // For now, clear input to try again
-      setInputValue('');
+      setInputValue(''); // Wrong answer, clear to retry
     }
   };
 
@@ -136,14 +178,17 @@ export default function DesafioMatematica() {
     
     const finalTime = Date.now() - (startTime || Date.now());
     
-    // Update Leaderboard
+    // Update Leaderboard specific to this mode
+    const key = `mathLeaderboard_${selectedOperator}_${selectedLevel}`;
+    const currentBoard = loadLeaderboard();
+    
     const newEntry = { name: studentName, time: finalTime, date: new Date().toISOString() };
-    const updatedLeaderboard = [...leaderboard, newEntry]
+    const updatedLeaderboard = [...currentBoard, newEntry]
       .sort((a, b) => a.time - b.time)
-      .slice(0, 10); // Keep top 10
+      .slice(0, 5); // Keep top 5
       
     setLeaderboard(updatedLeaderboard);
-    localStorage.setItem('mathLeaderboard', JSON.stringify(updatedLeaderboard));
+    localStorage.setItem(key, JSON.stringify(updatedLeaderboard));
   };
 
   const formatTime = (ms: number) => {
@@ -154,20 +199,29 @@ export default function DesafioMatematica() {
     return `${mins > 0 ? `${mins}m ` : ''}${secs}.${millis}s`;
   };
 
+  const getFeedbackMessage = () => {
+    if (!elapsedTime) return "";
+    const avgSeconds = (elapsedTime / 1000) / TOTAL_QUESTIONS;
+    if (avgSeconds <= 3) return "Incrível! Foste super rápida, um verdadeiro relâmpago! ⚡";
+    if (avgSeconds <= 6) return "Muito bem! Estás no bom caminho. Continua a treinar! 🏃‍♀️";
+    return "Boa tentativa! Precisas treinar mais um pouco este nível para ficares super rápida. Não desistas! 💪";
+  };
+
   if (isFinished) {
     return (
       <>
         <Header />
         <main className="container animate-fade-in">
           <div className={styles.challengeCard}>
-            <h1 className={styles.title}>Parabéns, {studentName}! 🎉</h1>
+            <h1 className={styles.title}>Fim do Desafio! 🎉</h1>
             <p className={styles.timeResult}>O teu tempo: <strong>{formatTime(elapsedTime)}</strong></p>
+            <p className={styles.feedbackMessage}>{getFeedbackMessage()}</p>
             
             <div className={styles.leaderboardBox}>
-              <h2>🏆 Tabela de Líderes 🏆</h2>
+              <h2>🏆 Recordes ({selectedOperator} - Nível {selectedLevel}) 🏆</h2>
               <ul className={styles.leaderboardList}>
                 {leaderboard.map((entry, idx) => (
-                  <li key={idx} className={idx === 0 ? styles.firstPlace : ''}>
+                  <li key={idx} className={entry.time === elapsedTime && entry.name === studentName ? styles.firstPlace : ''}>
                     <span>{idx + 1}º - {entry.name}</span>
                     <span>{formatTime(entry.time)}</span>
                   </li>
@@ -176,14 +230,18 @@ export default function DesafioMatematica() {
             </div>
 
             <div className={styles.actionRow}>
-              <button className="btn-secondary" onClick={() => router.push('/materia/matematica')}>Voltar</button>
+              <button className="btn-secondary" onClick={() => {
+                setIsFinished(false);
+                setStartTime(null);
+                setElapsedTime(0);
+                setCurrentIndex(0);
+              }}>Mudar Nível/Conta</button>
               <button className="btn-primary" onClick={() => {
-                setProblems(generateProblems());
+                setIsFinished(false);
                 setCurrentIndex(0);
                 setInputValue('');
-                setIsFinished(false);
-                setStartTime(Date.now());
-              }}>Jogar Novamente!</button>
+                startChallenge();
+              }}>Tentar Bater o Recorde!</button>
             </div>
           </div>
         </main>
@@ -198,12 +256,45 @@ export default function DesafioMatematica() {
         {!startTime ? (
           <div className={styles.challengeCard}>
             <div className={styles.icon}>⏱️</div>
-            <h1 className={styles.title}>Desafio de Velocidade</h1>
-            <p className={styles.description}>
-              Prepara-te para {TOTAL_QUESTIONS} continhas de Matemática! 
-              Sê o mais rápido possível a acertar todas. O tempo só conta quando clicares em "Começar".
-            </p>
-            <button className="btn-primary" onClick={startChallenge} style={{ fontSize: '1.5rem', padding: '1rem 3rem' }}>
+            <h1 className={styles.title}>Treino de Velocidade</h1>
+            <p className={styles.description}>Escolhe a operação e o nível que queres treinar!</p>
+            
+            <div className={styles.selectorGroup}>
+              <h3>1. Qual a operação?</h3>
+              <div className={styles.buttonRow}>
+                {['+', '-', 'x', '÷'].map((op) => (
+                  <button 
+                    key={op} 
+                    className={`${styles.selectBtn} ${selectedOperator === op ? styles.selected : ''}`}
+                    onClick={() => setSelectedOperator(op)}
+                  >
+                    {op}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.selectorGroup}>
+              <h3>2. Qual o nível?</h3>
+              <div className={styles.buttonRow}>
+                {[1, 2, 3].map((lvl) => (
+                  <button 
+                    key={lvl} 
+                    className={`${styles.selectBtn} ${selectedLevel === lvl ? styles.selected : ''}`}
+                    onClick={() => setSelectedLevel(lvl)}
+                  >
+                    Nível {lvl}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button 
+              className="btn-primary" 
+              onClick={startChallenge} 
+              disabled={!selectedOperator || !selectedLevel}
+              style={{ fontSize: '1.5rem', padding: '1rem 3rem', marginTop: '1rem' }}
+            >
               Começar!
             </button>
           </div>

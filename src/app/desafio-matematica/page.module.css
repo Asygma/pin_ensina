@@ -134,3 +134,56 @@
   gap: 1rem;
   margin-top: 2rem;
 }
+
+.selectorGroup {
+  width: 100%;
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.selectorGroup h3 {
+  font-size: 1.25rem;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.selectBtn {
+  background: var(--background);
+  border: 3px solid transparent;
+  color: var(--text-main);
+  font-size: 1.2rem;
+  font-weight: 800;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.selectBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-sm);
+}
+
+.selectBtn.selected {
+  background: var(--math);
+  color: white;
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.feedbackMessage {
+  font-size: 1.25rem;
+  color: var(--primary);
+  font-weight: 700;
+  margin-bottom: 2rem;
+  background: var(--background);
+  padding: 1rem;
+  border-radius: 1rem;
+}
