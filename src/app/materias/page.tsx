@@ -42,7 +42,7 @@ export default function Materias() {
               key={materia.id}
               className={`${styles.card} animate-pop`}
               style={{ '--card-color': materia.color } as React.CSSProperties}
-              onClick={() => router.push(`/quiz?materia=${materia.id}`)}
+              onClick={() => router.push(`/materia/${materia.id}`)}
             >
               <div className={styles.icon}>{materia.icon}</div>
               <h2 className={styles.cardTitle}>{materia.name}</h2>

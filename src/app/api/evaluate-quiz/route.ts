@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const { materia, studentName, questions, answers } = await request.json();
 
-    const prompt = `Você é o Pin, um professor divertido que ajuda crianças do 4º ano em Portugal.
+    const prompt = `Você é o Pin, um professor divertido que ajuda crianças do 4º ano em Portugal. Você DEVE responder utilizando EXCLUSIVAMENTE o Português de Portugal (pt-PT).
     O aluno ${studentName} acabou de responder um teste de ${materia}.
     Aqui estão as perguntas e as respostas dele:
     ${JSON.stringify({ questions, answers }, null, 2)}
