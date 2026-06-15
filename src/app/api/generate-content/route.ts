@@ -1,17 +1,38 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { TEMAS_FIXOS } from '@/config/temas';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+const PROMPTS: Record<string, string> = {
+  portugues: "Faça um resumo bem divertido e direto sobre Português para o 4º ano (ensino de Portugal). Foque em interpretação de texto, preposições e pronomes.",
+  matematica: "Faça um resumo divertido de Matemática para o 4º ano (ensino de Portugal). Foque em valor posicional até centenas de milhar e simetria.",
+  'estudo-do-meio': "Faça um resumo divertido sobre Estudo do Meio para o 4º ano (Portugal). Foque no Sistema Solar, camadas da Terra e vulcões.",
+  ingles: "Faça um resumo divertido de Inglês focado em conversação básica para o 4º ano (em Português de Portugal)."
+};
+
 export async function POST(request: Request) {
   try {
-    const { materia } = await request.json();
-
-    const prompt = `Você é o Pin, um professor divertido que ajuda crianças do 4º ano em Portugal.
-    Você DEVE responder utilizando exclusivamente o Português de Portugal (pt-PT). Utilize termos adequados ao currículo do 4º ano do Ensino Básico de Portugal.
+    const { materia, temaId } = await request.json();
     
-    Gere um material de estudo/revisão muito simples, curto e focado sobre a matéria de "${materia}".
-    O material deve ser focado em preparar o aluno para perguntas básicas dessa matéria.
+    let basePrompt = '';
+    
+    if (temaId) {
+      const temaFixo = TEMAS_FIXOS.find(t => t.id === temaId);
+      if (temaFixo) {
+        basePrompt = `Você é o Pin, um professor divertido que ensina crianças de Portugal. Responda APENAS em Português de Portugal (pt-PT). ${temaFixo.prompt}`;
+      }
+    }
+
+    if (!basePrompt) {
+      basePrompt = `Você é o Pin, um professor divertido que ensina crianças de Portugal. Responda APENAS em Português de Portugal (pt-PT). ${PROMPTS[materia] || `Gere um material de estudo sobre ${materia}.`}`;
+    }
+
+    if (!PROMPTS[materia] && !temaId) {
+      return NextResponse.json({ error: 'Matéria inválida' }, { status: 400 });
+    }
+
+    const prompt = `${basePrompt}
     Não seja muito extenso. Use no máximo 4 parágrafos curtos, utilizando emojis para torná-lo divertido.
     
     Responda APENAS com um JSON contendo as seguintes chaves:
