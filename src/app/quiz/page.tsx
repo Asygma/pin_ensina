@@ -22,6 +22,7 @@ function QuizContent() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const name = localStorage.getItem('studentName');
@@ -39,10 +40,23 @@ function QuizContent() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ materia })
         });
-        const data = await response.json();
+        
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          throw new Error(response.status === 504 ? "O servidor demorou muito a responder (Timeout). Tente novamente." : "Resposta inválida do servidor.");
+        }
+        
+        if (!response.ok || data.error) {
+          throw new Error(data.details || data.error || 'Erro desconhecido');
+        }
+        
         setQuestions(data.questions || []);
-      } catch (error) {
-        console.error("Error fetching questions:", error);
+      } catch (err: any) {
+        console.error("Failed to load quiz:", err);
+        setErrorMsg(`Oops, não conseguimos gerar as perguntas! Detalhes: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -77,9 +91,16 @@ function QuizContent() {
     );
   }
 
-  if (questions.length === 0) {
+  if (errorMsg || questions.length === 0) {
     return (
-      <main className="container"><h2>Oops, não conseguimos gerar as perguntas!</h2></main>
+      <main className="container">
+        <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+          <h2>{errorMsg || "Oops, não conseguimos gerar as perguntas!"}</h2>
+          <button className="btn-primary" onClick={() => window.location.reload()} style={{ marginTop: '2rem' }}>
+            Tentar Novamente
+          </button>
+        </div>
+      </main>
     );
   }
 
